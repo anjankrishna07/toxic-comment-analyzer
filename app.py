@@ -53,7 +53,7 @@ def predict_toxicity(comment):
 # ===============================
 # ✅ Streamlit User Interface
 # ===============================
-st.title("🧪 Toxic Comment Detector (BERT)")
+st.title("🧪 Toxic Comment Analyzer Using (BERT)")
 st.write("Enter a comment to see the predicted toxic category probabilities.")
 
 user_input = st.text_area("Type a comment:")

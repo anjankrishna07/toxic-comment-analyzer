@@ -13,7 +13,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # ✅ Cache the model for faster loading
 @st.cache_resource
 def load_model():
-    st.write("🔄 Loading model from Hugging Face Hub... (only first time)")
+    st.write("Trust me I'm fast and I only load for one time")
     model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_PATH)
     model = model.to(device)

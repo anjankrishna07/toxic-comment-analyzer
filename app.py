@@ -1,12 +1,12 @@
 # ===============================
-# Streamlit App - Toxic Comment Detection (Loads Model from Hugging Face)
+# Streamlit App - Toxic Comment Detection (Without severe_toxicity)
 # ===============================
 import streamlit as st
 import torch
 import numpy as np
 from transformers import BertForSequenceClassification, BertTokenizerFast
 
-# ✅ Your Hugging Face model repo (replace with your actual username/repo)
+# ✅ Hugging Face model repo
 MODEL_PATH = "krish1123/toxic-comment-analyzer"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -22,13 +22,13 @@ def load_model():
 
 model, tokenizer = load_model()
 
-# ✅ Toxic labels
+# ✅ Toxic labels (removed severe_toxicity)
 label_cols = [
-    'toxicity', 'severe_toxicity', 'obscene',
-    'threat', 'insult', 'identity_attack', 'sexual_explicit'
+    'toxicity', 'obscene', 'threat',
+    'insult', 'identity_attack', 'sexual_explicit'
 ]
 
-# ✅ Prediction function
+# ✅ Prediction function (skips severe_toxicity)
 def predict_toxicity(comment):
     encoding = tokenizer(
         comment,
@@ -47,14 +47,17 @@ def predict_toxicity(comment):
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         probs = torch.sigmoid(outputs.logits).cpu().numpy()[0]
 
-    results = {label: f"{prob:.2f}" for label, prob in zip(label_cols, probs)}
+    # Original order: [toxicity, severe_toxicity, obscene, threat, insult, identity_attack, sexual_explicit]
+    filtered_probs = np.delete(probs, 1)  # ✅ Remove severe_toxicity (index 1)
+
+    results = {label: f"{prob:.2f}" for label, prob in zip(label_cols, filtered_probs)}
     return results
 
 # ===============================
 # ✅ Streamlit User Interface
 # ===============================
-st.title("🧪 Toxic Comment Analyzer Using (BERT)")
-st.write("Enter a comment to see the predicted toxic category probabilities.")
+st.title("🧪 Toxic Comment Analyzer (BERT)")
+st.write("Enter a comment to see the predicted toxic category probabilities (excluding severe_toxicity).")
 
 user_input = st.text_area("Type a comment:")
 

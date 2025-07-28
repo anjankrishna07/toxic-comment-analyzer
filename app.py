@@ -1,22 +1,20 @@
 # ===============================
-# Streamlit App - Toxic Comment Detection (Using .safetensors)
+# Streamlit App - Toxic Comment Detection (Loads Model from Hugging Face)
 # ===============================
 import streamlit as st
 import torch
 import numpy as np
 from transformers import BertForSequenceClassification, BertTokenizerFast
 
-# ✅ Path to your saved model folder
-MODEL_PATH = "bert-toxic-comment-model"  # Ensure model.safetensors is inside this folder
+# ✅ Your Hugging Face model repo (replace with your actual username/repo)
+MODEL_PATH = "krish1123/toxic-comment-analyzer"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ✅ Cache the model for faster loading
 @st.cache_resource
 def load_model():
-    model = BertForSequenceClassification.from_pretrained(
-        MODEL_PATH,
-        from_safetensors=True  # ✅ Explicitly load .safetensors weights
-    )
+    st.write("🔄 Loading model from Hugging Face Hub... (only first time)")
+    model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_PATH)
     model = model.to(device)
     model.eval()
@@ -49,7 +47,6 @@ def predict_toxicity(comment):
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         probs = torch.sigmoid(outputs.logits).cpu().numpy()[0]
 
-    # Results as dictionary
     results = {label: f"{prob:.2f}" for label, prob in zip(label_cols, probs)}
     return results
 

@@ -1,4 +1,4 @@
 torch
 transformers
-gradio
-numpy
+streamlit
+safetensors

@@ -1,19 +1,22 @@
 # ===============================
-# STEP 7: STREAMLIT APP - TOXIC COMMENT DETECTION
-# (Same logic as your Gradio version)
+# Streamlit App - Toxic Comment Detection (Using .safetensors)
 # ===============================
 import streamlit as st
 import torch
 import numpy as np
 from transformers import BertForSequenceClassification, BertTokenizerFast
 
-# ✅ Load trained model and tokenizer
-MODEL_PATH = "bert-toxic-comment-model"  # Same as Gradio
+# ✅ Path to your saved model folder
+MODEL_PATH = "bert-toxic-comment-model"  # Ensure model.safetensors is inside this folder
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# ✅ Cache the model for faster loading
 @st.cache_resource
 def load_model():
-    model = BertForSequenceClassification.from_pretrained(MODEL_PATH)
+    model = BertForSequenceClassification.from_pretrained(
+        MODEL_PATH,
+        from_safetensors=True  # ✅ Explicitly load .safetensors weights
+    )
     tokenizer = BertTokenizerFast.from_pretrained(MODEL_PATH)
     model = model.to(device)
     model.eval()
@@ -21,13 +24,13 @@ def load_model():
 
 model, tokenizer = load_model()
 
-# ✅ Toxic labels (same order)
+# ✅ Toxic labels
 label_cols = [
     'toxicity', 'severe_toxicity', 'obscene',
     'threat', 'insult', 'identity_attack', 'sexual_explicit'
 ]
 
-# ✅ Prediction Function (unchanged logic)
+# ✅ Prediction function
 def predict_toxicity(comment):
     encoding = tokenizer(
         comment,
@@ -46,11 +49,12 @@ def predict_toxicity(comment):
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         probs = torch.sigmoid(outputs.logits).cpu().numpy()[0]
 
+    # Results as dictionary
     results = {label: f"{prob:.2f}" for label, prob in zip(label_cols, probs)}
     return results
 
 # ===============================
-# Streamlit UI (Mirroring Gradio behavior)
+# ✅ Streamlit User Interface
 # ===============================
 st.title("🧪 Toxic Comment Detector (BERT)")
 st.write("Enter a comment to see the predicted toxic category probabilities.")
